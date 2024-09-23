@@ -37,12 +37,12 @@ export const REPLACE_PRODUCT_THUMBNAIL = `
     WHEN image_id = ? THEN 0
     WHEN image_id = ? THEN 1
     ELSE main
-END
-WHERE image_id IN (?, ?);
-`
+  END
+  WHERE image_id IN (?, ?);
+`;
 
 export const UPDATE_PRODUCT_FIELDS = `
-    UPDATE products 
-    SET title = ?, description = ?, price = ? 
-    WHERE product_id = ?
-`
+  UPDATE products 
+  SET title = ?, description = ?, price = ? 
+  WHERE product_id = ?
+`;

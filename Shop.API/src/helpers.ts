@@ -1,44 +1,26 @@
-import { CommentCreatePayload, ICommentEntity, IProductImageEntity, IProductSearchFilter } from "../types";
-import { mapCommentEntity } from "./services/mapping";
-import { mapImageEntity } from "./services/mapping";
 import { IComment, IProduct, IProductImage } from "@Shared/types";
+import {
+  CommentCreatePayload,
+  ICommentEntity,
+  IProductSearchFilter,
+} from "../types";
+import { mapComment } from "./services/mapping";
+import { IProductImageEntity } from "../types";
+import { mapImageEntity } from "./services/mapping";
 
 type CommentValidator = (comment: CommentCreatePayload) => string | null;
 
-export const validateComment: CommentValidator = (comment) => {
-  if (!comment || !Object.keys(comment).length) {
-    return "Comment is absent or empty";
-  }
-
-  const requiredFields = new Set<keyof CommentCreatePayload>([
-    "name",
-    "email",
-    "body",
-    "productId"
-  ]);
-
-  let wrongFieldName;
-
-  requiredFields.forEach((fieldName) => {
-    if (!comment[fieldName]) {
-      wrongFieldName = fieldName;
-      return;
-    }
-  });
-
-  if (wrongFieldName) {
-    return `Field '${wrongFieldName}' is absent`;
-  }
-
-  return null;
-}
-
-const compareValues = (target: string, compare: string): boolean => {
+export const areValuesEqual = (target: string, compare: string): boolean => {
   return target.toLowerCase() === compare.toLowerCase();
-}
+};
 
-export const checkCommentUniq = (payload: CommentCreatePayload, comments: IComment[]): boolean => {
-  const byEmail = comments.find(({ email }) => compareValues(payload.email, email));
+export const isCommentUnique = (
+  payload: CommentCreatePayload,
+  comments: IComment[]
+): boolean => {
+  const byEmail = comments.find(({ email }) =>
+    areValuesEqual(payload.email, email)
+  );
 
   if (!byEmail) {
     return true;
@@ -46,11 +28,11 @@ export const checkCommentUniq = (payload: CommentCreatePayload, comments: IComme
 
   const { body, name, productId } = byEmail;
   return !(
-    compareValues(payload.body, body) &&
-    compareValues(payload.name, name) &&
-    compareValues(payload.productId, productId)
+    areValuesEqual(payload.body, body) &&
+    areValuesEqual(payload.name, name) &&
+    areValuesEqual(payload.productId, productId)
   );
-}
+};
 
 export const enhanceProductsComments = (
   products: IProduct[],
@@ -59,7 +41,7 @@ export const enhanceProductsComments = (
   const commentsByProductId = new Map<string, IComment[]>();
 
   for (let commentEntity of commentRows) {
-    const comment = mapCommentEntity(commentEntity);
+    const comment = mapComment(commentEntity);
     if (!commentsByProductId.has(comment.productId)) {
       commentsByProductId.set(comment.productId, []);
     }
@@ -75,13 +57,15 @@ export const enhanceProductsComments = (
   }
 
   return products;
-}
+};
 
-export const getProductsFilterQuery = (filter: IProductSearchFilter): [string, string[]] => {
+export const createProductsFilterQuery = (
+  filter: IProductSearchFilter
+): [string, string[]] => {
   const { title, description, priceFrom, priceTo } = filter;
 
   let query = "SELECT * FROM products WHERE ";
-  const values = []
+  const values = [];
 
   if (title) {
     query += "title LIKE ? ";
@@ -108,7 +92,7 @@ export const getProductsFilterQuery = (filter: IProductSearchFilter): [string, s
   }
 
   return [query, values];
-}
+};
 
 export const enhanceProductsImages = (
   products: IProduct[],
@@ -144,4 +128,32 @@ export const enhanceProductsImages = (
   }
 
   return products;
-}
+};
+
+export const validateComment: CommentValidator = (comment) => {
+  if (!comment || !Object.keys(comment).length) {
+    return "Comment is absent or empty";
+  }
+
+  const requiredFields = new Set<keyof CommentCreatePayload>([
+    "name",
+    "email",
+    "body",
+    "productId",
+  ]);
+
+  let wrongFieldName;
+
+  requiredFields.forEach((fieldName) => {
+    if (!comment[fieldName]) {
+      wrongFieldName = fieldName;
+      return;
+    }
+  });
+
+  if (wrongFieldName) {
+    return `Field '${wrongFieldName}' is absent`;
+  }
+
+  return null;
+};

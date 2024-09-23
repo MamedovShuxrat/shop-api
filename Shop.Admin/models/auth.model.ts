@@ -1,16 +1,12 @@
 import axios from "axios";
-import { IAuthRequisites } from "@Shared/types";
+import { IAuthRequisits } from "@Shared/types";
 import { API_HOST } from "./const";
 
-export async function verifyRequisites(
-  requisites: IAuthRequisites
+export async function verifyRequisits(
+  requisites: IAuthRequisits
 ): Promise<boolean> {
   try {
-    const { status } = await axios.post(
-      `${API_HOST}/auth`,
-      requisites
-    );
-
+    const { status } = await axios.post(`${API_HOST}/auth`, requisites);
     return status === 200;
   } catch (e) {
     return false;

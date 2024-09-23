@@ -1,37 +1,36 @@
+export interface IAuthRequisits {
+  password: string;
+  username: string;
+}
+
 export interface IComment {
+  body: string;
+  email: string;
   id: string;
   name: string;
-  email: string;
-  body: string;
   productId: string;
 }
 
 export interface IProduct {
-  id: string;
-  title: string;
+  comments?: IComment[];
   description: string;
+  id: string;
+  images?: IProductImage[];
   price: number;
   thumbnail?: IProductImage;
-  comments?: IComment[];
-  images?: IProductImage[];
+  title: string;
+}
+
+export interface IProductFilterPayload {
+  description?: string;
+  priceFrom?: number;
+  priceTo?: number;
+  title?: string;
 }
 
 export interface IProductImage {
   id: string;
-  productId: string;
   main: boolean;
+  productId: string;
   url: string;
 }
-
-export interface IProductFilterPayload {
-  title?: string;
-  description?: string;
-  priceFrom?: number;
-  priceTo?: number;
-}
-
-export interface IAuthRequisites {
-  username: string;
-  password: string;
-}
-

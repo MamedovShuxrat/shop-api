@@ -1,7 +1,7 @@
-import { IAuthRequisites } from "@Shared/types";
-import { NextFunction, Request, Response, Router } from "express";
-import { throwServerError } from "./helper";
-import { verifyRequisites } from "../models/auth.model";
+import { NextFunction, Router, Request, Response } from "express";
+import { throwError } from "./helper";
+import { IAuthRequisits } from "@Shared/types";
+import { verifyRequisits } from "../models/auth.model";
 
 export const authRouter = Router();
 
@@ -20,48 +20,45 @@ export const validateSession = (
   } else {
     res.redirect(`/${process.env.ADMIN_PATH}/auth/login`);
   }
-}
+};
 
 authRouter.get("/login", async (req: Request, res: Response) => {
   try {
     res.render("login");
   } catch (e) {
-    throwServerError(res, e);
+    throwError(res, e);
   }
 });
 
-authRouter.post("/authenticate", async (
-  req: Request<{}, {}, IAuthRequisites>,
-  res: Response
-) => {
-  try {
-    const verified = await verifyRequisites(req.body);
+authRouter.post(
+  "/authenticate",
+  async (req: Request<{}, {}, IAuthRequisits>, res: Response) => {
+    try {
+      const verified = await verifyRequisits(req.body);
 
-    if (verified) {
-      req.session.username = req.body.username;
-      res.redirect(`/${process.env.ADMIN_PATH}`);
-    } else {
-      res.redirect(`/${process.env.ADMIN_PATH}/auth/login`);
+      if (verified) {
+        req.session.username = req.body.username;
+        req.session.save();
+        res.redirect(`/${process.env.ADMIN_PATH}`);
+      } else {
+        res.redirect(`/${process.env.ADMIN_PATH}/auth/login`);
+      }
+    } catch (e) {
+      throwError(res, e);
     }
-  } catch (e) {
-    throwServerError(res, e);
   }
-});
+);
 
-/**
- * 35.4.1
- * метод logout для выхода из админки
- */
 authRouter.get("/logout", async (req: Request, res: Response) => {
   try {
     req.session.destroy((e) => {
       if (e) {
-        console.log("Something wen wrong with session destroying", e);
+        console.log("Something went wrong with session destroying", e);
       }
 
       res.redirect(`/${process.env.ADMIN_PATH}/auth/login`);
-    })
+    });
   } catch (e) {
-    throwServerError(res, e);
+    throwError(res, e);
   }
 });

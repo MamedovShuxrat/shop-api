@@ -1,24 +1,20 @@
-import { createConnection, Connection } from "mysql2/promise";
-
-const { DB_HOST, DB_PORT, DB_PASSWORD, DB_USER, DB_NAME } = process.env;
+import mysql, { Connection } from "mysql2/promise";
 
 export async function initDataBase(): Promise<Connection | null> {
-  let connection: Connection | null = null;
-
+  const { DB_HOST, DB_PORT, DB_PASSWORD, DB_USER, DB_NAME } = process.env;
   try {
-    connection = await createConnection({
-      host: DB_HOST,
-      port: Number(DB_PORT),
+    const connection = await mysql.createConnection({
       password: DB_PASSWORD,
+      port: Number(DB_PORT),
+      host: DB_HOST,
+      database: DB_NAME,
       user: DB_USER,
-      database: DB_NAME
     });
-  } catch (e: any) {
+
+    console.log(`Connection to DB ProductsApplication established`);
+    return connection;
+  } catch (e) {
     console.error(e.message || e);
     return null;
   }
-
-  console.log(`Connection to DB ${DB_NAME} established`);
-
-  return connection;
 }
